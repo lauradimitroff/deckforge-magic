@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparateur de decks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe6; --panel: #fffdf8; --panel2: #f6f1e7; --text: #1e1a14; --muted: #776f61; --line: #e4dccb;
+    --gold: #a2741f; --green: #1d8a52; --green-soft: #e1f2e7; --red: #c2412f; --red-soft: #fbe4df;
+    --warn: #a35f00; --warn-soft: #fff1d6;
+    --shadow: 0 1px 2px rgba(50,35,10,.06), 0 10px 30px rgba(50,35,10,.07);
+    --glow: radial-gradient(1200px 500px at 15% -10%, rgba(214,170,80,.18), transparent 60%),
+            radial-gradient(900px 500px at 100% 0%, rgba(70,140,90,.10), transparent 60%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1014; --panel: #161920; --panel2: #1c2028; --text: #ece7de; --muted: #9b958a; --line: #2a2f39;
+      --gold: #d9b263; --green: #4cc98b; --green-soft: rgba(76,201,139,.13); --red: #f06c5c; --red-soft: rgba(240,108,92,.13);
+      --warn: #f0b24f; --warn-soft: rgba(240,178,79,.13);
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+      --glow: radial-gradient(1200px 500px at 15% -10%, rgba(217,178,99,.10), transparent 60%),
+              radial-gradient(900px 500px at 100% 0%, rgba(76,201,139,.06), transparent 60%);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1014; --panel: #161920; --panel2: #1c2028; --text: #ece7de; --muted: #9b958a; --line: #2a2f39;
+    --gold: #d9b263; --green: #4cc98b; --green-soft: rgba(76,201,139,.13); --red: #f06c5c; --red-soft: rgba(240,108,92,.13);
+    --warn: #f0b24f; --warn-soft: rgba(240,178,79,.13);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+    --glow: radial-gradient(1200px 500px at 15% -10%, rgba(217,178,99,.10), transparent 60%),
+            radial-gradient(900px 500px at 100% 0%, rgba(76,201,139,.06), transparent 60%);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--glow), var(--bg); background-attachment: fixed; color: var(--text);
+    font: 15px/1.5 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1180px; margin: 0 auto; padding: 36px 16px 80px; }
+  .display { font-family: Cinzel, Georgia, serif; letter-spacing: .02em; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  h1 { font-size: 30px; margin: 0; line-height: 1.1; }
+  h1 span { color: var(--gold); }
+  .sub { color: var(--muted); margin: 6px 0 0; max-width: 620px; }
+  h2 { font-size: 18px; margin: 0; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+  button, .btn { font: inherit; font-size: 14px; font-weight: 500; border: 1px solid var(--line); background: var(--panel); color: var(--text);
+    border-radius: 10px; padding: 7px 14px; cursor: pointer; transition: border-color .15s, background .15s, transform .1s; }
+  button:hover, .btn:hover { border-color: var(--muted); }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--gold); border-color: var(--gold); color: #1b1408; font-weight: 600; }
+  button.ghost { background: transparent; }
+  .btn input { display: none; }
+  select { font: inherit; font-size: 14px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--text); }
+
+  /* Import */
+  .imports { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .drop { border: 1.5px dashed var(--line); border-radius: 14px; padding: 14px; background: var(--panel2); transition: border-color .15s, background .15s; }
+  .drop.over { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--panel2)); }
+  .drop.loaded { border-style: solid; }
+  .drop-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .drop-title { display: flex; align-items: center; gap: 10px; }
+  .letter { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-family: Cinzel, serif; font-weight: 700;
+    background: var(--panel); border: 1px solid var(--line); color: var(--gold); }
+  .drop-title small { display: block; color: var(--muted); font-size: 12.5px; }
+  .drop-actions { display: flex; gap: 6px; }
+  textarea { width: 100%; height: 140px; margin-top: 12px; resize: vertical; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--panel); color: var(--text); padding: 10px; font: 12.5px/1.45 ui-monospace, Menlo, monospace; }
+  .drop.loaded:not(.editing) textarea { display: none; }
+  .import-foot { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+  /* Commandant */
+  .hero { position: relative; border-radius: 18px; overflow: hidden; min-height: 190px; margin-bottom: 20px; box-shadow: var(--shadow);
+    background: #1a1610 var(--art, none) center 30% / cover no-repeat; border: 1px solid var(--line); display: flex; align-items: flex-end; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,8,5,.92) 0%, rgba(10,8,5,.65) 45%, rgba(10,8,5,.15) 100%); }
+  .hero-body { position: relative; padding: 22px 24px; color: #f4ede0; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; width: 100%; flex-wrap: wrap; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: 11.5px; color: #e2c17c; font-weight: 600; }
+  .hero h2 { font-size: 28px; margin: 4px 0 2px; line-height: 1.15; }
+  .hero .type { color: #cfc6b5; font-size: 14px; }
+  .pips { display: flex; gap: 4px; margin-top: 10px; }
+  .pips img { width: 22px; height: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+  .hero select { background: rgba(20,16,10,.7); color: #f4ede0; border-color: rgba(255,255,255,.25); max-width: 260px; }
+  .hero label { font-size: 13px; color: #cfc6b5; display: flex; flex-direction: column; gap: 4px; }
+
+  /* Barre d'outils */
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .seg { display: inline-flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg button { border: 0; background: transparent; padding: 5px 12px; border-radius: 7px; color: var(--muted); }
+  .seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .status.err { color: var(--warn); }
+
+  /* Colonnes de différences */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .col { border-radius: 14px; padding: 16px; border: 1px solid var(--line); background: var(--panel2); min-width: 0; }
+  .col.add { border-top: 3px solid var(--green); }
+  .col.remove { border-top: 3px solid var(--red); }
+  .col-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .col-head h3 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .col.add h3 { color: var(--green); }
+  .col.remove h3 { color: var(--red); }
+  .col-head .n { color: var(--muted); font-size: 13px; }
+  .group-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 600; margin: 18px 0 10px; display: flex; gap: 8px; align-items: center; }
+  .group-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .groups { display: flex; flex-wrap: wrap; column-gap: 22px; }
+  .group { flex: 0 1 auto; max-width: 100%; min-width: 0; }
+  .group .grid { display: flex; flex-wrap: wrap; gap: 14px; }
+  .group .tile { width: 132px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px; }
+  .empty { color: var(--muted); text-align: center; padding: 28px 8px; font-size: 14px; }
+
+  /* Tuile carte */
+  .tile { position: relative; display: flex; flex-direction: column; gap: 8px; }
+  .art { position: relative; display: block; width: 100%; aspect-ratio: 488 / 680; padding: 0; border: 0; border-radius: 4.8% / 3.5%;
+    overflow: hidden; background: var(--panel); cursor: zoom-in; box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: transform .18s, box-shadow .18s, filter .2s, opacity .2s; }
+  .art:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 24px rgba(0,0,0,.28); }
+  .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; text-align: center; font-size: 13px; font-weight: 600;
+    background: linear-gradient(160deg, var(--panel2), var(--line)); color: var(--muted); border: 1px solid var(--line); border-radius: inherit; }
+  .tile.add.done .art { box-shadow: 0 0 0 3px var(--green), 0 6px 18px rgba(0,0,0,.2); }
+  .tile.remove.done .art { filter: grayscale(.85); opacity: .5; box-shadow: 0 0 0 3px var(--red); }
+  .qty-badge { position: absolute; bottom: 9%; left: 7px; z-index: 1; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35); font-variant-numeric: tabular-nums; }
+  .tile.add .qty-badge { background: var(--green); }
+  .tile.remove .qty-badge { background: var(--red); }
+  .crown { position: absolute; top: 7px; right: 7px; z-index: 1; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--gold); color: #1b1408; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+  .act { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 6px 8px; font-size: 13px; font-weight: 600; }
+  .act .ico { font-size: 15px; line-height: 1; }
+  .act.add { color: var(--green); border-color: color-mix(in srgb, var(--green) 55%, transparent); }
+  .act.remove { color: var(--red); border-color: color-mix(in srgb, var(--red) 55%, transparent); }
+  .act.add:hover { background: var(--green-soft); }
+  .act.remove:hover { background: var(--red-soft); }
+  .act.add.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .act.remove.on { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* Vue liste */
+  .rows { display: flex; flex-direction: column; gap: 4px; }
+  .row { display: grid; grid-template-columns: 52px 1fr auto auto; gap: 12px; align-items: center; padding: 6px 8px; border-radius: 10px; }
+  .row:hover { background: var(--panel); }
+  .row.add.done { background: var(--green-soft); }
+  .row.remove.done { background: var(--red-soft); }
+  .row.remove.done .rname { text-decoration: line-through; text-decoration-color: var(--red); }
+  .thumb { width: 52px; height: 38px; border-radius: 6px; object-fit: cover; background: var(--line); display: block; }
+  .rname { font-weight: 500; overflow-wrap: anywhere; }
+  .rtype { color: var(--muted); font-size: 12.5px; }
+  .rqty { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .row .act { width: 40px; height: 34px; padding: 0; }
+  .row .act .lbl { display: none; }
+  .mini-crown { color: var(--gold); margin-left: 4px; }
+
+  /* Inchangées */
+  details.same { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; }
+  details.same summary { cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; }
+  details.same .grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 14px; }
+  details.same .art { cursor: zoom-in; }
+
+  /* Résultat */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0 20px; }
+  .stat { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .stat .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  .stat .v { font-size: 22px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .stat .v small { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .stat.ok .v { color: var(--green); }
+  .stat.warn .v { color: var(--warn); }
+  .progress { height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .progress > div { height: 100%; background: var(--gold); width: 0; transition: width .25s; }
+  .result-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .result-cols h3 { font-size: 14px; margin: 0 0 8px; }
+  .result-cols h3.add { color: var(--green); }
+  .result-cols h3.remove { color: var(--red); }
+  .result-cols ul { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+  .result-cols li { padding: 5px 0; display: flex; gap: 10px; align-items: center; border-bottom: 1px dashed var(--line); }
+  .result-cols li.pending { color: var(--muted); }
+  .result-cols li .mark { width: 18px; text-align: center; flex: none; font-weight: 700; }
+  .result-cols li.done.add .mark { color: var(--green); }
+  .result-cols li.done.remove .mark { color: var(--red); }
+  .result-cols li img { width: 34px; height: 25px; object-fit: cover; border-radius: 4px; flex: none; }
+  .exports { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+
+  /* Aperçus */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: grid; place-items: center; z-index: 50; padding: 16px; cursor: zoom-out;
+    opacity: 0; pointer-events: none; transition: opacity .18s; backdrop-filter: blur(4px); }
+  .modal.show { opacity: 1; pointer-events: auto; }
+  .modal img { max-height: 88vh; max-width: 100%; border-radius: 4.8% / 3.5%; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+  .hover-prev { position: fixed; z-index: 40; width: 220px; pointer-events: none; border-radius: 4.8% / 3.5%; box-shadow: 0 14px 40px rgba(0,0,0,.45); display: none; }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text); color: var(--bg);
+    padding: 9px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 60; }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+  .hidden { display: none !important; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 30px; }
+
+  @media (max-width: 780px) {
+    .imports, .cols, .result-cols { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
+    .group .tile { width: 124px; }
+    h1 { font-size: 24px; }
+    .hero h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 class="display">Comparateur <span>de decks</span></h1>
+      <p class="sub">Importe ton précon d'origine et ta version modifiée, puis valide chaque échange de cartes.</p>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="imports">
+      <div class="drop" data-side="A">
+        <div class="drop-head">
+          <div class="drop-title"><span class="letter">A</span><div><strong>Précon d'origine</strong><small class="info">Glisse un .txt ou colle la liste</small></div></div>
+          <div class="drop-actions">
+            <button class="ghost edit hidden">Modifier</button>
+            <label class="btn">Importer .txt<input type="file" accept=".txt,text/plain"></label>
+          </div>
+        </div>
+        <textarea placeholder="1 Sol Ring&#10;1 Command Tower&#10;10 Forest&#10;…" spellcheck="false"></textarea>
+      </div>
+      <div class="drop" data-side="B">
+        <div class="drop-head">
+          <div class="drop-title"><span class="letter">B</span><div><strong>Ma version</strong><small class="info">Glisse un .txt ou colle la liste</small></div></div>
+          <div class="drop-actions">
+            <button class="ghost edit hidden">Modifier</button>
+            <label class="btn">Importer .txt<input type="file" accept=".txt,text/plain"></label>
+          </div>
+        </div>
+        <textarea placeholder="1 Sol Ring&#10;1 Command Tower&#10;10 Forest&#10;…" spellcheck="false"></textarea>
+      </div>
+    </div>
+    <div class="import-foot">
+      <button id="demo" class="ghost">Charger un exemple</button>
+      <button id="clear" class="ghost">Tout effacer</button>
+    </div>
+  </section>
+
+  <section id="hero" class="hero hidden"></section>
+
+  <section class="panel" id="diffPanel">
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <h2 class="display">Différences</h2>
+        <span id="sfStatus" class="status"></span>
+      </div>
+      <div class="tools">
+        <div class="seg" id="viewSeg"><button data-view="cards">Cartes</button><button data-view="list">Liste</button></div>
+        <div class="seg" id="filterSeg"><button data-filter="all">Tout</button><button data-filter="pending">En attente</button><button data-filter="done">Validées</button></div>
+        <select id="groupBy" aria-label="Grouper par"></select>
+        <button id="validateAll">Tout valider</button>
+        <button id="resetAll" class="ghost">Réinitialiser</button>
+      </div>
+    </div>
+    <div id="diff"></div>
+    <details class="same hidden" id="sameBox"><summary></summary><div class="grid" id="sameGrid"></div></details>
+  </section>
+
+  <section class="panel" id="resultPanel">
+    <h2 class="display">Résultat</h2>
+    <div class="stats" id="stats"></div>
+    <div class="result-cols">
+      <div><h3 class="add" id="addTitle">À ajouter</h3><ul id="addList"></ul></div>
+      <div><h3 class="remove" id="removeTitle">À retirer</h3><ul id="removeList"></ul></div>
+    </div>
+    <div class="exports">
+      <button id="exportFinal" class="primary">Exporter le deck final .txt</button>
+      <button id="copyChanges">Copier les changements</button>
+      <button id="exportChanges">Exporter les changements .txt</button>
+    </div>
+  </section>
+
+  <footer>Images et données des cartes : Scryfall. Magic: The Gathering est une marque de Wizards of the Coast.</footer>
+</main>
+
+<div class="modal" id="modal"><img alt=""></div>
+<img class="hover-prev" id="hoverPrev" alt="">
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Lecture des listes ================= */
+const SECTION_RE = /^(commander|commandant|deck|main ?deck|mainboard|sideboard|maybeboard|companion|compagnon)\s*:?\s*$/i;
+const OUT_OF_DECK = /^(sideboard|maybeboard)$/i;
+
+function normalizeKey(name) {
+  const front = name.split(/\s*\/\/?\s*/)[0];
+  return front.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, ' ').trim();
+}
+
+function parseList(text) {
+  const cards = new Map(), outside = [];
+  let section = 'main';
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('//') || line.startsWith('#')) continue;
+    const sec = line.match(SECTION_RE);
+    if (sec) { section = sec[1].toLowerCase(); continue; }
+    const m = line.match(/^(\d+)\s*x?\s+(.+)$/i);
+    if (!m) continue;
+    const qty = parseInt(m[1], 10);
+    let rest = m[2];
+    const cats = [];
+    rest = rest.replace(/\s*\[([^\]]*)\]\s*/g, (_, c) => {
+      cats.push(...c.split(',').map(s => s.replace(/\{[^}]*\}/g, '').trim()).filter(Boolean));
+      return ' ';
+    });
+    rest = rest.replace(/\s*\^[^^]*\^\s*/g, ' ').replace(/\s*\*[A-Z]+\*\s*/gi, ' ')
+               .replace(/\s*\([A-Za-z0-9]{2,6}\)(\s+[A-Za-z0-9\-★]+)?\s*$/, '');
+    const name = rest.replace(/\s+/g, ' ').trim();
+    if (!name) continue;
+    const isCommander = /^command/.test(section) || cats.some(c => /^commander$/i.test(c));
+    if (OUT_OF_DECK.test(section) || cats.some(c => OUT_OF_DECK.test(c))) { outside.push({ name, qty }); continue; }
+    const key = normalizeKey(name);
+    const cleanCats = cats.filter(c => !/^commander$/i.test(c));
+    const ex = cards.get(key);
+    if (ex) { ex.qty += qty; ex.commander ||= isCommander; if (!ex.cats.length) ex.cats = cleanCats; }
+    else cards.set(key, { key, name, qty, cats: cleanCats, commander: isCommander });
+  }
+  return { cards, outside };
+}
+const total = cards => { let n = 0; for (const c of cards.values()) n += c.qty; return n; };
+
+/* ================= Données Scryfall ================= */
+const SF_KEY = 'deck-compare-scryfall-v1';
+let sf = {};
+let sfStatus = { loading: false, done: 0, total: 0, error: null };
+try { sf = JSON.parse(localStorage.getItem(SF_KEY) || '{}'); } catch (e) {}
+const saveSf = () => { try { localStorage.setItem(SF_KEY, JSON.stringify(sf)); } catch (e) {} };
+
+function pickCard(c) {
+  const f = c.card_faces && c.card_faces[0];
+  const iu = c.image_uris || (f && f.image_uris) || {};
+  return { name: c.name, small: iu.small, normal: iu.normal, large: iu.large || iu.normal, art: iu.art_crop,
+           type: c.type_line || (f && f.type_line) || '', cmc: c.cmc || 0, identity: c.color_identity || [] };
+}
+
+async function ensureCards() {
+  if (sfStatus.loading) return;
+  const all = new Map();
+  for (const p of [parsedA, parsedB]) if (p) for (const c of p.cards.values()) all.set(c.key, c.name);
+  const missing = [...all].filter(([k]) => !(k in sf));
+  if (!missing.length) return;
+  sfStatus = { loading: true, done: 0, total: missing.length, error: null }; renderStatus();
+  for (let i = 0; i < missing.length; i += 75) {
+    const chunk = missing.slice(i, i + 75);
+    try {
+      const r = await fetch('https://api.scryfall.com/cards/collection', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ identifiers: chunk.map(([, n]) => ({ name: n.split(/\s*\/\/\s*/)[0] })) })
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const byKey = new Map(j.data.map(c => [normalizeKey(c.name), pickCard(c)]));
+      for (const [k] of chunk) sf[k] = byKey.get(k) || null;
+    } catch (e) { sfStatus.error = e.message; break; }
+    sfStatus.done += chunk.length; renderStatus();
+    await new Promise(r => setTimeout(r, 120));
+  }
+  sfStatus.loading = false; saveSf(); render();
+  if (!sfStatus.error) ensureCards();
+}
+
+const TYPE_ORDER = [['Creature', 'Créatures'], ['Planeswalker', 'Planeswalkers'], ['Battle', 'Batailles'], ['Instant', 'Éphémères'],
+                    ['Sorcery', 'Rituels'], ['Artifact', 'Artefacts'], ['Enchantment', 'Enchantements'], ['Land', 'Terrains']];
+function mainType(key) {
+  const d = sf[key]; if (!d) return 'Autres';
+  const t = d.type.split(' // ')[0];
+  if (/\bLand\b/.test(t) && !/Creature/.test(t)) return 'Terrains';
+  for (const [en, fr] of TYPE_ORDER) if (t.includes(en)) return fr;
+  return 'Autres';
+}
+const isLand = key => sf[key] && /\bLand\b/.test(sf[key].type.split(' // ')[0]);
+
+/* ================= État ================= */
+const STORE_KEY = 'deck-compare-v1';
+const state = { textA: '', textB: '', decisions: {}, commander: null, view: 'cards', filter: 'all', groupBy: 'type' };
+try { Object.assign(state, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} };
+
+let diff = [], parsedA = null, parsedB = null;
+
+function computeDiff() {
+  parsedA = state.textA.trim() ? parseList(state.textA) : null;
+  parsedB = state.textB.trim() ? parseList(state.textB) : null;
+  diff = [];
+  if (!parsedA || !parsedB) return;
+  for (const key of new Set([...parsedA.cards.keys(), ...parsedB.cards.keys()])) {
+    const a = parsedA.cards.get(key), b = parsedB.cards.get(key);
+    const qa = a ? a.qty : 0, qb = b ? b.qty : 0, delta = qb - qa;
+    const ref = b || a;
+    const cats = (delta > 0 ? b && b.cats : a && a.cats) || ref.cats || [];
+    diff.push({ key, name: ref.name, qa, qb, delta, type: delta > 0 ? 'add' : delta < 0 ? 'remove' : 'same', cat: cats[0] || 'Sans catégorie' });
+  }
+  for (const k of Object.keys(state.decisions)) {
+    const d = diff.find(x => x.key === k);
+    if (!d || d.type === 'same') delete state.decisions[k];
+  }
+  diff.sort((x, y) => x.name.localeCompare(y.name, 'fr'));
+}
+const changes = () => diff.filter(d => d.type !== 'same');
+
+function taggedCommander() {
+  for (const p of [parsedB, parsedA]) if (p) for (const c of p.cards.values()) if (c.commander) return c.key;
+  return null;
+}
+function commanderKey() {
+  const all = new Set([...(parsedA ? parsedA.cards.keys() : []), ...(parsedB ? parsedB.cards.keys() : [])]);
+  if (state.commander && all.has(state.commander)) return state.commander;
+  return taggedCommander();
+}
+function commanderCandidates() {
+  const m = new Map();
+  for (const p of [parsedB, parsedA]) if (p) for (const c of p.cards.values()) if (!m.has(c.key)) m.set(c.key, c.name);
+  return [...m].filter(([k]) => !sf[k] || /Legendary/.test(sf[k].type) && /Creature|Background/.test(sf[k].type))
+               .sort((a, b) => a[1].localeCompare(b[1], 'fr'));
+}
+
+/* ================= Rendu ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const img = (key, size = 'normal') => sf[key] && sf[key][size];
+
+function renderImports() {
+  for (const side of ['A', 'B']) {
+    const p = side === 'A' ? parsedA : parsedB;
+    const drop = document.querySelector(`.drop[data-side="${side}"]`);
+    drop.classList.toggle('loaded', !!p);
+    drop.querySelector('.edit').classList.toggle('hidden', !p);
+    drop.querySelector('.edit').textContent = drop.classList.contains('editing') ? 'Masquer' : 'Modifier';
+    let txt = 'Glisse un .txt ou colle la liste';
+    if (p) {
+      txt = `${total(p.cards)} cartes · ${p.cards.size} différentes`;
+      const out = p.outside.reduce((n, c) => n + c.qty, 0);
+      if (out) txt += ` · ${out} hors deck ignorées`;
+    }
+    drop.querySelector('.info').textContent = txt;
+  }
+}
+
+function renderHero() {
+  const el = $('#hero');
+  if (!parsedA || !parsedB) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  const key = commanderKey(), d = key && sf[key];
+  const name = key ? ((parsedB.cards.get(key) || parsedA.cards.get(key)).name) : null;
+  el.style.setProperty('--art', d && d.art ? `url("${d.art}")` : 'none');
+  const opts = commanderCandidates().map(([k, n]) => `<option value="${esc(k)}" ${k === key ? 'selected' : ''}>${esc(n)}</option>`).join('');
+  const pips = d ? d.identity.map(c => `<img src="https://svgs.scryfall.io/card-symbols/${c}.svg" alt="${c}">`).join('') : '';
+  el.innerHTML = `<div class="hero-body">
+      <div>
+        <div class="eyebrow">♛ Commandant</div>
+        <h2 class="display">${name ? esc(name) : 'Choisis ton commandant'}</h2>
+        <div class="type">${d ? esc(d.type) : (name ? '' : 'Ta liste n\'indique pas le commandant : sélectionne-le dans la liste.')}</div>
+        ${pips ? `<div class="pips">${pips}</div>` : ''}
+      </div>
+      <label>${name ? 'Changer' : 'Sélectionner'}
+        <select id="cmdSelect"><option value="">—</option>${opts}</select>
+      </label>
+    </div>`;
+}
+
+function renderStatus() {
+  const el = $('#sfStatus');
+  el.classList.remove('err');
+  if (sfStatus.loading) el.textContent = `Chargement des images… ${sfStatus.done}/${sfStatus.total}`;
+  else if (sfStatus.error) { el.classList.add('err'); el.innerHTML = `Images indisponibles (connexion ?) <button id="retrySf" class="ghost">Réessayer</button>`; }
+  else el.textContent = '';
+}
+
+function renderGroupOptions() {
+  const hasCats = changes().some(d => d.cat !== 'Sans catégorie');
+  const opts = [['type', 'Par type de carte']];
+  if (hasCats) opts.push(['cat', 'Par catégorie Archidekt']);
+  opts.push(['none', 'Sans regroupement']);
+  if (!opts.some(o => o[0] === state.groupBy)) state.groupBy = 'type';
+  $('#groupBy').innerHTML = opts.map(([v, l]) => `<option value="${v}" ${v === state.groupBy ? 'selected' : ''}>${l}</option>`).join('');
+}
+
+function tileHtml(d, cmd) {
+  const done = !!state.decisions[d.key], n = Math.abs(d.delta);
+  const qty = (d.qa && d.qb) ? `${d.qa} → ${d.qb}` : (d.type === 'add' ? `+${n}` : `−${n}`);
+  const src = img(d.key);
+  const lbl = d.type === 'add' ? (done ? 'Ajoutée' : 'Ajouter') : (done ? 'Retirée' : 'Retirer');
+  const ico = done ? '✓' : (d.type === 'add' ? '➜' : '✖');
+  return `<div class="tile ${d.type} ${done ? 'done' : ''}">
+      <button class="art" data-preview="${esc(d.key)}" aria-label="Agrandir ${esc(d.name)}">
+        <span class="qty-badge">${qty}</span>
+        ${d.key === cmd ? '<span class="crown" title="Commandant">♛</span>' : ''}
+        ${src ? `<img src="${src}" alt="${esc(d.name)}" loading="lazy">` : `<span class="ph">${esc(d.name)}</span>`}
+      </button>
+      <button class="act ${d.type} ${done ? 'on' : ''}" data-act="${esc(d.key)}" aria-pressed="${done}" title="${esc(lbl + ' ' + d.name)}">
+        <span class="ico">${ico}</span><span class="lbl">${lbl}</span>
+      </button>
+    </div>`;
+}
+
+function rowHtml(d, cmd) {
+  const done = !!state.decisions[d.key], n = Math.abs(d.delta);
+  const qty = (d.qa && d.qb) ? `${d.qa} → ${d.qb}` : (d.type === 'add' ? `+${n}` : `−${n}`);
+  const art = img(d.key, 'art');
+  return `<div class="row ${d.type} ${done ? 'done' : ''}" data-hover="${esc(d.key)}">
+      ${art ? `<img class="thumb" src="${art}" alt="" loading="lazy">` : '<span class="thumb"></span>'}
+      <div><div class="rname">${esc(d.name)}${d.key === cmd ? '<span class="mini-crown" title="Commandant">♛</span>' : ''}</div>
+           <div class="rtype">${sf[d.key] ? esc(sf[d.key].type) : ''}</div></div>
+      <span class="rqty">${qty}</span>
+      <button class="act ${d.type} ${done ? 'on' : ''}" data-act="${esc(d.key)}" aria-pressed="${done}" title="${d.type === 'add' ? 'Ajouter' : 'Retirer'} ${esc(d.name)}">
+        <span class="ico">${done ? '✓' : (d.type === 'add' ? '➜' : '✖')}</span>
+      </button>
+    </div>`;
+}
+
+function groupsFor(list) {
+  const groups = new Map();
+  const g = d => state.groupBy === 'type' ? mainType(d.key) : state.groupBy === 'cat' ? d.cat : '';
+  for (const d of list) { const k = g(d); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(d); }
+  const order = TYPE_ORDER.map(t => t[1]);
+  const rank = k => state.groupBy === 'type' ? (order.indexOf(k) + 1 || 99) : (k === 'Sans catégorie' ? 99 : 0);
+  return [...groups].sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0], 'fr'));
+}
+
+function renderDiff() {
+  const el = $('#diff'), cmd = commanderKey();
+  document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === state.view));
+  document.querySelectorAll('#filterSeg button').forEach(b => b.classList.toggle('on', b.dataset.filter === state.filter));
+  renderGroupOptions();
+
+  if (!parsedA || !parsedB) {
+    el.innerHTML = '<div class="empty">Importe les deux listes pour voir les différences.</div>';
+    $('#sameBox').classList.add('hidden'); return;
+  }
+  const keep = d => state.filter === 'pending' ? !state.decisions[d.key] : state.filter === 'done' ? !!state.decisions[d.key] : true;
+  const col = type => {
+    const all = changes().filter(d => d.type === type), shown = all.filter(keep);
+    const doneN = all.filter(d => state.decisions[d.key]).length;
+    const cards = all.reduce((n, d) => n + Math.abs(d.delta), 0);
+    const title = type === 'add' ? '➜ Entrent dans le deck' : '✖ Sortent du deck';
+    let body;
+    if (!all.length) body = `<div class="empty">${type === 'add' ? 'Aucune carte à ajouter.' : 'Aucune carte à retirer.'}</div>`;
+    else if (!shown.length) body = '<div class="empty">Rien pour ce filtre.</div>';
+    else if (state.view === 'cards') body = '<div class="groups">' + groupsFor(shown).map(([g, items]) =>
+      `<div class="group">${g ? `<div class="group-title">${esc(g)} · ${items.length}</div>` : '<div style="height:14px"></div>'}
+        <div class="grid">${items.map(d => tileHtml(d, cmd)).join('')}</div></div>`).join('') + '</div>';
+    else body = groupsFor(shown).map(([g, items]) =>
+      (g ? `<div class="group-title">${esc(g)} · ${items.length}</div>` : '<div style="height:12px"></div>') +
+      `<div class="rows">${items.map(d => rowHtml(d, cmd)).join('')}</div>`).join('');
+    return `<div class="col ${type}"><div class="col-head"><h3>${title}</h3><span class="n">${cards} carte${cards > 1 ? 's' : ''} · ${doneN}/${all.length} validée${doneN > 1 ? 's' : ''}</span></div>${body}</div>`;
+  };
+  el.innerHTML = changes().length
+    ? `<div class="cols">${col('add')}${col('remove')}</div>`
+    : '<div class="empty">Les deux listes sont identiques.</div>';
+
+  const same = diff.filter(d => d.type === 'same');
+  const box = $('#sameBox');
+  box.classList.toggle('hidden', !same.length);
+  box.querySelector('summary').textContent = `Cartes inchangées (${same.reduce((n, d) => n + d.qa, 0)})`;
+  if (box.open) renderSame();
+}
+
+function renderSame() {
+  const cmd = commanderKey();
+  const same = diff.filter(d => d.type === 'same').sort((a, b) => (b.key === cmd) - (a.key === cmd) || a.name.localeCompare(b.name, 'fr'));
+  $('#sameGrid').innerHTML = same.map(d => {
+    const src = img(d.key, 'small');
+    return `<div class="tile">
+      <button class="art" data-preview="${esc(d.key)}" aria-label="Agrandir ${esc(d.name)}">
+      ${d.qa > 1 ? `<span class="qty-badge" style="background:#5d574d">${d.qa}</span>` : ''}
+      ${d.key === cmd ? '<span class="crown">♛</span>' : ''}
+      ${src ? `<img src="${src}" alt="${esc(d.name)}" loading="lazy">` : `<span class="ph">${esc(d.name)}</span>`}</button></div>`;
+  }).join('');
+}
+
+function deckStats(cards) {
+  let n = 0, lands = 0, cmcSum = 0, cmcN = 0, known = true;
+  for (const c of cards.values()) {
+    n += c.qty;
+    const d = sf[c.key]; if (!d) { known = false; continue; }
+    if (isLand(c.key)) lands += c.qty; else { cmcSum += d.cmc * c.qty; cmcN += c.qty; }
+  }
+  return { n, lands, cmc: cmcN ? cmcSum / cmcN : 0, known };
+}
+
+function renderResult() {
+  const ch = changes(), cmd = commanderKey();
+  const adds = ch.filter(d => d.type === 'add'), rems = ch.filter(d => d.type === 'remove');
+  const doneN = ch.filter(d => state.decisions[d.key]).length;
+  const sum = arr => arr.reduce((n, d) => n + Math.abs(d.delta), 0);
+  const li = d => {
+    const ok = state.decisions[d.key], art = img(d.key, 'art');
+    return `<li class="${d.type} ${ok ? 'done' : 'pending'}"><span class="mark">${ok ? '✓' : '·'}</span>
+      ${art ? `<img src="${art}" alt="" loading="lazy">` : ''}<span>${Math.abs(d.delta)} ${esc(d.name)}${d.key === cmd ? ' <span class="mini-crown">♛</span>' : ''}</span></li>`;
+  };
+  $('#addTitle').textContent = `➜ À ajouter (${sum(adds)})`;
+  $('#removeTitle').textContent = `✖ À retirer (${sum(rems)})`;
+  $('#addList').innerHTML = adds.map(li).join('') || '<li class="pending">—</li>';
+  $('#removeList').innerHTML = rems.map(li).join('') || '<li class="pending">—</li>';
+
+  const st = $('#stats');
+  if (!parsedA || !parsedB) { st.innerHTML = ''; return; }
+  const a = deckStats(parsedA.cards), f = deckStats(finalDeck());
+  const pct = ch.length ? Math.round(100 * doneN / ch.length) : 100;
+  const arrow = (x, y, dec = 0) => x.toFixed(dec) === y.toFixed(dec) ? `${y.toFixed(dec)}` : `${y.toFixed(dec)} <small>(${x.toFixed(dec)} avant)</small>`;
+  st.innerHTML = `
+    <div class="stat"><div class="k">Validé</div><div class="v">${doneN}<small> / ${ch.length}</small></div><div class="progress"><div style="width:${pct}%"></div></div></div>
+    <div class="stat ${f.n === 100 ? 'ok' : 'warn'}"><div class="k">Deck final</div><div class="v">${f.n}<small> carte${f.n > 1 ? 's' : ''}${f.n === 100 ? ' ✓' : f.n > 100 ? ` · ${f.n - 100} de trop` : ` · ${100 - f.n} manquante${100 - f.n > 1 ? 's' : ''}`}</small></div></div>
+    <div class="stat"><div class="k">Terrains</div><div class="v">${a.known && f.known ? arrow(a.lands, f.lands) : '…'}</div></div>
+    <div class="stat"><div class="k">Coût moyen</div><div class="v">${a.known && f.known ? arrow(a.cmc, f.cmc, 2) : '…'}</div></div>`;
+}
+
+function render() { renderImports(); renderHero(); renderStatus(); renderDiff(); renderResult(); }
+function refresh() { computeDiff(); save(); render(); ensureCards(); }
+
+/* ================= Deck final & exports ================= */
+function finalDeck() {
+  const out = new Map();
+  for (const c of parsedA.cards.values()) out.set(c.key, { ...c });
+  for (const d of changes()) {
+    if (!state.decisions[d.key]) continue;
+    const cur = out.get(d.key);
+    if (cur) { cur.qty = d.qb; if (!cur.qty) out.delete(d.key); }
+    else out.set(d.key, { ...parsedB.cards.get(d.key) });
+  }
+  return out;
+}
+function changesText() {
+  const ok = changes().filter(d => state.decisions[d.key]);
+  const adds = ok.filter(d => d.type === 'add'), rems = ok.filter(d => d.type === 'remove');
+  let t = '';
+  if (adds.length) t += 'À AJOUTER\n' + adds.map(d => `${d.delta}x ${d.name}`).join('\n') + '\n';
+  if (rems.length) t += (t ? '\n' : '') + 'À RETIRER\n' + rems.map(d => `${-d.delta}x ${d.name}`).join('\n') + '\n';
+  return t || 'Aucun changement validé.\n';
+}
+function finalText() {
+  const cmd = commanderKey();
+  const cards = [...finalDeck().values()].sort((a, b) => (b.key === cmd) - (a.key === cmd) || a.name.localeCompare(b.name, 'fr'));
+  return cards.map(c => {
+    const cats = (c.key === cmd ? ['Commander{top}'] : []).concat(c.cats);
+    return `${c.qty}x ${c.name}` + (cats.length ? ` [${cats.join(',')}]` : '');
+  }).join('\n') + '\n';
+}
+function download(name, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ================= Événements ================= */
+document.querySelectorAll('.drop').forEach(drop => {
+  const side = drop.dataset.side, ta = drop.querySelector('textarea'), input = drop.querySelector('input[type=file]');
+  const setText = txt => { ta.value = txt; state['text' + side] = txt; drop.classList.remove('editing'); refresh(); };
+  const readFile = f => f && f.text().then(setText);
+  ta.addEventListener('input', () => { state['text' + side] = ta.value; refresh(); });
+  input.addEventListener('change', () => { readFile(input.files[0]); input.value = ''; });
+  drop.querySelector('.edit').addEventListener('click', () => { drop.classList.toggle('editing'); renderImports(); });
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); readFile(e.dataTransfer.files[0]); });
+});
+
+const modal = $('#modal');
+document.addEventListener('click', e => {
+  const act = e.target.closest('[data-act]');
+  if (act) {
+    const k = act.dataset.act;
+    if (state.decisions[k]) delete state.decisions[k]; else state.decisions[k] = true;
+    save(); renderDiff(); renderResult(); return;
+  }
+  const prev = e.target.closest('[data-preview]');
+  if (prev) {
+    const d = sf[prev.dataset.preview];
+    if (d && d.large) { modal.querySelector('img').src = d.large; modal.classList.add('show'); }
+    return;
+  }
+  const v = e.target.closest('[data-view]'); if (v) { state.view = v.dataset.view; save(); renderDiff(); return; }
+  const f = e.target.closest('[data-filter]'); if (f) { state.filter = f.dataset.filter; save(); renderDiff(); return; }
+  if (e.target.id === 'retrySf') { sfStatus.error = null; ensureCards(); }
+});
+modal.addEventListener('click', () => modal.classList.remove('show'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('show'); });
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'cmdSelect') { state.commander = e.target.value || null; save(); render(); }
+  if (e.target.id === 'groupBy') { state.groupBy = e.target.value; save(); renderDiff(); }
+});
+$('#sameBox').addEventListener('toggle', () => { if ($('#sameBox').open) renderSame(); });
+
+const hp = $('#hoverPrev');
+document.addEventListener('mouseover', e => {
+  const r = e.target.closest('[data-hover]');
+  const d = r && sf[r.dataset.hover];
+  if (d && d.normal) { hp.src = d.normal; hp.style.display = 'block'; } else hp.style.display = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (hp.style.display !== 'block') return;
+  const w = 220, h = 306;
+  let x = e.clientX + 24, y = e.clientY - h / 2;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 24;
+  y = Math.max(8, Math.min(y, innerHeight - h - 8));
+  hp.style.left = x + 'px'; hp.style.top = y + 'px';
+});
+
+$('#validateAll').addEventListener('click', () => { changes().forEach(d => state.decisions[d.key] = true); save(); renderDiff(); renderResult(); });
+$('#resetAll').addEventListener('click', () => { state.decisions = {}; save(); renderDiff(); renderResult(); });
+$('#clear').addEventListener('click', () => {
+  if (!confirm('Effacer les deux listes et toutes les validations ?')) return;
+  Object.assign(state, { textA: '', textB: '', decisions: {}, commander: null });
+  document.querySelectorAll('.drop textarea').forEach(t => t.value = '');
+  refresh();
+});
+$('#copyChanges').addEventListener('click', () => navigator.clipboard.writeText(changesText()).then(() => toast('Changements copiés'), () => toast('Copie impossible')));
+$('#exportChanges').addEventListener('click', () => download('changements.txt', changesText()));
+$('#exportFinal').addEventListener('click', () => {
+  if (!parsedA || !parsedB) return toast('Importe d\'abord les deux listes');
+  download('deck-final.txt', finalText());
+});
+
+const DEMO_A = `1x Sol Ring (c21) 263 [Ramp]
+1x Arcane Signet (c21) 236 [Ramp]
+1x Commander's Sphere (c21) 241 [Ramp]
+1x Command Tower (c21) 284 [Land]
+1x Counterspell (c21) 108 [Interaction]
+1x Swords to Plowshares (c21) 104 [Removal]
+1x Rhystic Study (pcy) 45 [Draw]
+1x Mind Stone (c21) 252 [Ramp]
+1x Sun Titan (c21) 101 [Finisher]
+1x Atraxa, Praetors' Voice (c16) 28 [Commander{top}]
+12x Plains (c21) 289 [Land]
+10x Island (c21) 290 [Land]
+`;
+const DEMO_B = `1x Sol Ring (cmm) 464 *F* [Ramp]
+1x Arcane Signet (c21) 236 [Ramp]
+1x Mana Crypt (2xm) 270 [Ramp]
+1x Command Tower (cmr) 350 [Land]
+1x Counterspell (c21) 108 [Interaction]
+1x Swords to Plowshares (c21) 104 [Removal]
+1x Path to Exile (2xm) 25 [Removal]
+1x Rhystic Study (pcy) 45 [Draw]
+1x Mystic Remora (ice) 87 [Draw]
+1x Sun Titan (c21) 101 [Finisher]
+1x Atraxa, Praetors' Voice (c16) 28 [Commander{top}]
+1x Hallowed Fountain (rna) 251 [Land]
+10x Plains (c21) 289 [Land]
+10x Island (c21) 290 [Land]
+`;
+$('#demo').addEventListener('click', () => {
+  Object.assign(state, { textA: DEMO_A, textB: DEMO_B, decisions: {}, commander: null });
+  document.querySelector('.drop[data-side="A"] textarea').value = DEMO_A;
+  document.querySelector('.drop[data-side="B"] textarea').value = DEMO_B;
+  refresh();
+});
+
+/* ================= Démarrage ================= */
+document.querySelector('.drop[data-side="A"] textarea').value = state.textA;
+document.querySelector('.drop[data-side="B"] textarea').value = state.textB;
+refresh();
+</script>
+</body>
+</html>

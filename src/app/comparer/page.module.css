@@ -1,0 +1,21 @@
+.header {
+  margin-bottom: 24px;
+}
+.header h1 {
+  font-size: 30px;
+  line-height: 1.1;
+}
+.header h1 span {
+  color: var(--gold);
+}
+.header p {
+  color: var(--muted);
+  margin: 6px 0 0;
+  max-width: 680px;
+}
+
+@media (max-width: 780px) {
+  .header h1 {
+    font-size: 24px;
+  }
+}

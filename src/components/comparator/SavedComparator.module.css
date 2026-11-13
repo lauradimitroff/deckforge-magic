@@ -1,0 +1,12 @@
+.status {
+  margin: -8px 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 20px;
+}
+.status[data-status="saved"] {
+  color: var(--green);
+}
+.status[data-status="error"] {
+  color: var(--red);
+}

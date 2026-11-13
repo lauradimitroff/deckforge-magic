@@ -1,0 +1,231 @@
+.pageHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.pageHead h1 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+.pageHead p {
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+.crumbs {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.crumbs a {
+  color: var(--muted);
+}
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.btnLink {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--gold);
+  color: #1b1408;
+}
+.btnLink.secondary {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  font-weight: 500;
+}
+
+/* Liste des decks */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.deckCard {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.deckCard:hover {
+  transform: translateY(-2px);
+}
+.deckCard .body {
+  padding: 14px 16px 16px;
+}
+.deckCard h2 {
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+.art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  object-position: center 30%;
+  background: #1a1610;
+}
+.artFallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  font-size: 34px;
+  color: var(--gold);
+  background: linear-gradient(160deg, var(--panel2), var(--line));
+}
+.emptyState {
+  text-align: center;
+  padding: 40px 16px;
+}
+.emptyState p {
+  color: var(--muted);
+  margin: 8px 0 18px;
+}
+
+/* Détail d'un deck */
+.twoCols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.panelTitle {
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+.versions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.version {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.version:last-child {
+  border-bottom: 0;
+}
+.vnum {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display), serif;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--panel2);
+  border: 1px solid var(--line);
+}
+.vmeta {
+  min-width: 0;
+}
+.vmeta strong {
+  display: block;
+}
+.vactions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
+.compareForm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+  font-size: 14px;
+}
+
+.inlineActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.danger {
+  color: var(--red);
+}
+.small {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+/* Formulaires */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.error {
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  margin: 0;
+}
+.listInput {
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--panel2);
+}
+.listInput.over {
+  border-color: var(--gold);
+}
+.listHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.listHead strong {
+  margin-right: auto;
+}
+.listInput textarea {
+  width: 100%;
+  height: 180px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 10px;
+  font:
+    12.5px/1.45 ui-monospace,
+    Menlo,
+    monospace;
+}
+
+@media (max-width: 860px) {
+  .twoCols {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,39 @@
+.card {
+  max-width: 420px;
+  margin: 24px auto;
+  padding: 28px;
+}
+.card h1 {
+  font-size: 24px;
+}
+.sub {
+  color: var(--muted);
+  margin: 6px 0 20px;
+  font-size: 14px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.form button[type="submit"] {
+  padding: 10px;
+  margin-top: 4px;
+}
+
+.error {
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+
+.switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin: 20px 0 0;
+}

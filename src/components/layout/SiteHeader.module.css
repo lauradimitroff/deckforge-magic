@@ -1,0 +1,82 @@
+.bar {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand span {
+  color: var(--gold);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.nav > a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav > a:hover {
+  color: var(--text);
+}
+.nav > a.cta {
+  color: #1b1408;
+  background: var(--gold);
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+}
+.name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  display: inline-block;
+  width: 110px;
+  height: 30px;
+}
+
+@media (max-width: 600px) {
+  .name {
+    display: none;
+  }
+}

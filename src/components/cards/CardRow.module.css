@@ -1,0 +1,44 @@
+.row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+.row:hover {
+  background: var(--panel);
+}
+.row.add {
+  background: var(--green-soft);
+}
+.row.remove {
+  background: var(--red-soft);
+}
+.row.remove .name {
+  text-decoration: line-through;
+  text-decoration-color: var(--red);
+}
+
+.thumb {
+  width: 52px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--line);
+  display: block;
+}
+.name {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.type {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.qty {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

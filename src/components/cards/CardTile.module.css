@@ -1,0 +1,12 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 132px;
+}
+
+@media (max-width: 780px) {
+  .tile {
+    width: 124px;
+  }
+}

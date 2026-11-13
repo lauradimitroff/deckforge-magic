@@ -1,0 +1,149 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.titleRow h2 {
+  font-size: 18px;
+}
+.tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.status {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.err {
+  color: var(--warn);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.col {
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  min-width: 0;
+}
+.col.add {
+  border-top: 3px solid var(--green);
+}
+.col.remove {
+  border-top: 3px solid var(--red);
+}
+.colHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.colHead h3 {
+  font-size: 17px;
+}
+.add .colHead h3 {
+  color: var(--green);
+}
+.remove .colHead h3 {
+  color: var(--red);
+}
+.colHead span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.colHint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Les groupes se placent côte à côte quand ils sont petits. */
+.groups {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 22px;
+}
+.group {
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.groupTitle {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 18px 0 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.groupTitle::after {
+  content: "";
+  flex: 1;
+  min-width: 12px;
+  height: 1px;
+  background: var(--line);
+}
+.spacer {
+  height: 14px;
+}
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.same {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+.same summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+.sameGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 780px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+  .tiles {
+    gap: 10px;
+  }
+}
