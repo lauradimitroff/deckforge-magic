@@ -8,7 +8,7 @@ les ajouts (➜) et les retraits (✖), puis exporte le deck final au format Arc
 - **Mes decks** (`/decks`) : avec un compte, chaque deck garde toutes ses versions (v1, v2…) et
   les validations de chaque comparaison sont enregistrées en base.
 
-En ligne : https://deckforge-brown.vercel.app
+En ligne : https://deckforge-magic.vercel.app
 
 ## Mettre en ligne une nouvelle version
 
