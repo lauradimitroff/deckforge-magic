@@ -9,7 +9,9 @@ export type CurrentUser = { id: string; name: string; email: string };
 export async function getUser(): Promise<CurrentUser | null> {
   // Lire les cookies d'abord : au pré-rendu, Next s'arrête ici proprement, avant l'appel à Neon
   // (qui sinon journalise une fausse erreur « Cookie validation error »).
-  await cookies();
+  const jar = await cookies();
+  // Sans cookie de session, personne n'est connecté : inutile d'interroger Neon Auth (aller-retour réseau).
+  if (!jar.getAll().some((c) => c.name.endsWith("neon-auth.session_token"))) return null;
   const { data } = await auth.getSession();
   const u = data?.user;
   return u ? { id: u.id, name: u.name, email: u.email } : null;
