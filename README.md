@@ -12,6 +12,9 @@ En ligne : https://deckforge-magic.vercel.app
 
 ## Mettre en ligne une nouvelle version
 
+Chaque envoi sur la branche `main` de GitHub met le site à jour automatiquement (Vercel).
+Pour mettre en ligne sans passer par GitHub :
+
 ```bash
 npx vercel deploy --prod
 ```
