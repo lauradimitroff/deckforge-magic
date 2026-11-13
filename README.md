@@ -16,8 +16,7 @@ En ligne : https://deckforge-magic.vercel.app
 npx vercel deploy --prod
 ```
 
-Les variables (base Neon, Neon Auth) sont déjà réglées dans le projet Vercel « deckforge ».
-Si l'adresse du site change, l'ajouter aux domaines autorisés : `neon neon-auth domain add https://…`.
+Les variables d'environnement sont déjà réglées dans le projet Vercel « deckforge ».
 
 ## Lancer le projet
 
@@ -31,15 +30,7 @@ npm run dev
 
 Puis ouvre l'adresse affichée (http://localhost:3000 par défaut).
 
-### Variables d'environnement (`.env.local`, non versionné)
-
-| Variable                  | Origine                                            |
-| ------------------------- | -------------------------------------------------- |
-| `DATABASE_URL` (+ `_UNPOOLED`) | Neon, via `neon env pull`                     |
-| `NEON_AUTH_BASE_URL`      | Neon Auth, via `neon env pull`                     |
-| `NEON_AUTH_COOKIE_SECRET` | À générer : `openssl rand -base64 32`              |
-
-Le projet Neon est lié dans `.neon` ; ses services (Postgres + comptes) sont déclarés dans `neon.ts`.
+Les variables d'environnement vont dans `.env.local` (non versionné).
 
 | Commande              | Rôle                                                  |
 | --------------------- | ----------------------------------------------------- |
@@ -49,7 +40,7 @@ Le projet Neon est lié dans `.neon` ; ses services (Postgres + comptes) sont d�
 | `npm run typecheck`   | Vérification des types (TypeScript)                   |
 | `npm run build`       | Version de production                                 |
 | `npm run db:generate` | Crée une migration SQL après un changement de schéma  |
-| `npm run db:migrate`  | Applique les migrations sur la base Neon              |
+| `npm run db:migrate`  | Applique les migrations sur la base                   |
 
 ## Organisation du code
 
@@ -61,7 +52,7 @@ src/
 │  ├─ auth/                 Connexion, inscription
 │  ├─ decks/                Mes decks, détail d'un deck, comparaison de deux versions
 │  │  └─ actions.ts         Actions serveur (créer, ajouter une version, enregistrer…)
-│  └─ api/auth/             Passerelle vers Neon Auth
+│  └─ api/auth/             Passerelle vers le service de comptes
 ├─ components/
 │  ├─ comparator/           Comparateur : ComparisonView (le cœur), version rapide et version sauvegardée
 │  ├─ cards/                Éléments de carte : image, tuile, ligne, bouton ➜/✖
@@ -71,7 +62,7 @@ src/
 ├─ db/                      Base de données (Drizzle) : schéma, connexion, lectures
 ├─ hooks/                   État côté navigateur, chargement Scryfall, préférences d'affichage
 ├─ lib/                     Logique pure, sans React, couverte par les tests
-│  ├─ auth/                 Neon Auth : serveur, navigateur, utilisateur connecté
+│  ├─ auth/                 Comptes : serveur, navigateur, utilisateur connecté
 │  ├─ parse.ts, diff.ts…    Lecture des listes, comparaison, exports, statistiques
 │  └─ __tests__/            Tests (dont tes vrais decks dans exemples/)
 └─ proxy.ts                 Protège /decks : redirige vers la connexion
