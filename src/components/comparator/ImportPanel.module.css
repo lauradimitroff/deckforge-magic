@@ -70,6 +70,43 @@
     monospace;
 }
 
+.preview {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  padding: 8px 10px;
+  font:
+    12.5px/1.6 ui-monospace,
+    Menlo,
+    monospace;
+}
+.preview ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.preview li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.more {
+  all: unset;
+  cursor: pointer;
+  color: var(--gold);
+  font-family: var(--font-body), sans-serif;
+  font-size: 12.5px;
+  margin-top: 4px;
+}
+.more:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.more:hover {
+  text-decoration: underline;
+}
+
 .foot {
   display: flex;
   gap: 8px;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Side } from "@/hooks/useComparator";
 import { cx } from "@/lib/cx";
 import { totalCards } from "@/lib/parse";
@@ -47,6 +47,8 @@ type DropProps = {
 function DeckDrop({ letter, title, text, deck, onText }: DropProps) {
   const [editing, setEditing] = useState(false);
   const [over, setOver] = useState(false);
+  // Après un collage, on replie sur l'aperçu ; pendant la frappe, la zone de texte reste ouverte.
+  const pasted = useRef(false);
 
   const readFile = (file?: File) => {
     if (!file) return;
@@ -105,15 +107,48 @@ function DeckDrop({ letter, title, text, deck, onText }: DropProps) {
           </label>
         </div>
       </div>
+      {deck && !editing && <Preview deck={deck} onShowAll={() => setEditing(true)} />}
       {(!deck || editing) && (
         <textarea
           className={styles.textarea}
           value={text}
-          onChange={(e) => onText(e.target.value)}
+          onPaste={() => {
+            pasted.current = true;
+          }}
+          onChange={(e) => {
+            onText(e.target.value);
+            setEditing(!pasted.current);
+            pasted.current = false;
+          }}
           placeholder={"1 Sol Ring\n1 Command Tower\n10 Forest\n…"}
           spellCheck={false}
           aria-label={`Liste ${letter} : ${title}`}
         />
+      )}
+    </div>
+  );
+}
+
+const PREVIEW_LINES = 5;
+
+/** Les premières cartes de la liste, pour voir d'un coup d'œil ce qui a été importé. */
+function Preview({ deck, onShowAll }: { deck: ParsedDeck; onShowAll: () => void }) {
+  const cards = [...deck.cards.values()];
+  const rest = cards.length - PREVIEW_LINES;
+  return (
+    <div className={styles.preview}>
+      <ul>
+        {cards.slice(0, PREVIEW_LINES).map((c) => (
+          <li key={c.key}>
+            {c.qty} {c.name}
+            {c.commander && <span className="crown"> ♛</span>}
+          </li>
+        ))}
+      </ul>
+      {rest > 0 && (
+        <button type="button" className={styles.more} onClick={onShowAll}>
+          … et {rest} autre{rest > 1 ? "s" : ""} — voir toute la liste
+        </button>
       )}
     </div>
   );
