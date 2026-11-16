@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Cinzel, Inter } from "next/font/google";
 import SiteHeader from "@/components/layout/SiteHeader";
 import "./globals.css";
@@ -18,7 +19,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <main className="page">{children}</main>
         <footer className="site-footer">
-          Images et données des cartes : Scryfall. Magic: The Gathering est une marque de Wizards of the Coast.
+          <p>Images et données des cartes : Scryfall. Magic: The Gathering est une marque de Wizards of the Coast.</p>
+          <nav aria-label="Informations">
+            <Link href="/mentions-legales">Mentions légales</Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/credits">Crédits</Link>
+          </nav>
         </footer>
       </body>
     </html>

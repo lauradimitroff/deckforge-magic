@@ -160,6 +160,20 @@ select {
   text-align: center;
   padding: 0 16px 40px;
 }
+.site-footer p {
+  margin: 0 0 6px;
+}
+.site-footer nav {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.site-footer nav a {
+  color: var(--muted);
+}
+.site-footer nav a:hover {
+  color: var(--text);
+}
 
 a {
   color: var(--gold);
