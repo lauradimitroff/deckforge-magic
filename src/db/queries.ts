@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, desc, eq, max, sql } from "drizzle-orm";
 import { db } from ".";
-import { comparisons, decks, deckVersions } from "./schema";
+import { comparisons, decks, deckVersions, wishlistItems, wishlists } from "./schema";
 
 /**
  * Lectures en base. Chaque fonction reçoit l'id de l'utilisateur connecté et ne renvoie
@@ -88,4 +88,42 @@ export async function getComparison(userId: string, deckId: string, fromId: stri
     .where(and(eq(comparisons.fromVersionId, fromId), eq(comparisons.toVersionId, toId)));
 
   return { deck: found.deck, versions: found.versions, from, to, decisions: saved?.decisions ?? {} };
+}
+
+/** Carte de liste de souhaits telle qu'envoyée au navigateur. */
+export type WishItem = { id: string; key: string; name: string; qty: number; note: string | null };
+
+const wishColumns = {
+  id: wishlistItems.id,
+  key: wishlistItems.cardKey,
+  name: wishlistItems.name,
+  qty: wishlistItems.qty,
+  note: wishlistItems.note,
+};
+
+export async function listWishlist(userId: string): Promise<WishItem[]> {
+  return db
+    .select(wishColumns)
+    .from(wishlistItems)
+    .where(eq(wishlistItems.ownerId, userId))
+    .orderBy(asc(wishlistItems.name));
+}
+
+/** Jeton du lien de partage, ou null si la liste n'est pas partagée. */
+export async function getShareToken(userId: string): Promise<string | null> {
+  const [row] = await db.select({ token: wishlists.shareToken }).from(wishlists).where(eq(wishlists.ownerId, userId));
+  return row?.token ?? null;
+}
+
+const TOKEN_RE = /^[A-Za-z0-9_-]{16,64}$/;
+
+/** Liste partagée (lecture seule, sans connexion) : le pseudo de la personne et ses cartes. */
+export async function getSharedWishlist(token: string) {
+  if (!TOKEN_RE.test(token)) return null;
+  const [owner] = await db
+    .select({ id: wishlists.ownerId, name: sql<string | null>`(select u.name from neon_auth."user" u where u.id = ${wishlists.ownerId})` })
+    .from(wishlists)
+    .where(eq(wishlists.shareToken, token));
+  if (!owner) return null;
+  return { ownerName: owner.name || "Quelqu'un", items: await listWishlist(owner.id) };
 }

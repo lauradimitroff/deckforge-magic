@@ -14,6 +14,7 @@ export default function SiteHeader() {
       <nav className={styles.nav}>
         <Link href="/comparer">Comparaison rapide</Link>
         <Link href="/decks">Mes decks</Link>
+        <Link href="/souhaits">Souhaits</Link>
         <Suspense fallback={<span className={styles.placeholder} />}>
           <Account />
         </Suspense>

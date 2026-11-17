@@ -57,6 +57,34 @@ export const comparisons = pgTable(
   (t) => [unique("comparisons_pair_uq").on(t.fromVersionId, t.toVersionId)],
 );
 
+/** Réglages de la liste de souhaits d'un utilisateur : lien de partage (null = non partagée). */
+export const wishlists = pgTable("wishlists", {
+  ownerId: uuid("owner_id").primaryKey(),
+  /** Jeton secret du lien public `/souhaits/<jeton>`. */
+  shareToken: text("share_token").unique(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Une carte voulue (pas encore possédée). Une ligne par carte et par utilisateur. */
+export const wishlistItems = pgTable(
+  "wishlist_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id").notNull(),
+    /** Clé normalisée (voir `normalizeKey`). */
+    cardKey: text("card_key").notNull(),
+    name: text("name").notNull(),
+    qty: integer("qty").notNull().default(1),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("wishlist_items_card_uq").on(t.ownerId, t.cardKey),
+    check("wishlist_items_qty_pos", sql`${t.qty} > 0`),
+  ],
+);
+
 export type Deck = typeof decks.$inferSelect;
 export type DeckVersion = typeof deckVersions.$inferSelect;
 export type Comparison = typeof comparisons.$inferSelect;
+export type WishlistItem = typeof wishlistItems.$inferSelect;

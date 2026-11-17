@@ -7,6 +7,9 @@ les ajouts (➜) et les retraits (✖), puis exporte le deck final au format Arc
 - **Comparaison rapide** (`/comparer`) : sans compte, tout reste dans le navigateur.
 - **Mes decks** (`/decks`) : avec un compte, chaque deck garde toutes ses versions (v1, v2…) et
   les validations de chaque comparaison sont enregistrées en base.
+- **Liste de souhaits** (`/souhaits`) : avec un compte, les cartes qu'on n'a pas encore (noms anglais
+  ou français). Un lien de partage permet de la montrer à n'importe qui, sans compte
+  (`/souhaits/<jeton>`) ; on peut le remplacer ou le désactiver.
 
 En ligne : https://deckforge-magic.vercel.app
 
@@ -55,11 +58,13 @@ src/
 │  ├─ auth/                 Connexion, inscription
 │  ├─ decks/                Mes decks, détail d'un deck, comparaison de deux versions
 │  │  └─ actions.ts         Actions serveur (créer, ajouter une version, enregistrer…)
+│  ├─ souhaits/             Ma liste de souhaits, et la page publique d'une liste partagée
 │  └─ api/auth/             Passerelle vers le service de comptes
 ├─ components/
 │  ├─ comparator/           Comparateur : ComparisonView (le cœur), version rapide et version sauvegardée
 │  ├─ cards/                Éléments de carte : image, tuile, ligne, bouton ➜/✖
 │  ├─ decks/                Formulaires et éléments des pages « Mes decks »
+│  ├─ wishlist/             Ajout de cartes, grille de la liste, encadré de partage
 │  ├─ auth/                 Formulaire de connexion / inscription
 │  └─ layout/               En-tête du site
 ├─ db/                      Base de données (Drizzle) : schéma, connexion, lectures
@@ -68,7 +73,7 @@ src/
 │  ├─ auth/                 Comptes : serveur, navigateur, utilisateur connecté
 │  ├─ parse.ts, diff.ts…    Lecture des listes, comparaison, exports, statistiques
 │  └─ __tests__/            Tests (dont tes vrais decks dans exemples/)
-└─ proxy.ts                 Protège /decks : redirige vers la connexion
+└─ proxy.ts                 Protège /decks et /souhaits : redirige vers la connexion
 drizzle/                    Migrations SQL
 exemples/                   Listes de decks d'exemple
 legacy/                     Ancienne version en un seul fichier HTML

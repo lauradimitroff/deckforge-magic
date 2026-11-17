@@ -1,6 +1,15 @@
 import { normalizeKey } from "./parse";
 import type { CardData } from "./types";
 
+/**
+ * En-têtes des appels à Scryfall. Côté serveur, Scryfall refuse le User-Agent par défaut de Node ;
+ * dans le navigateur, on laisse celui du navigateur (sinon requête CORS supplémentaire).
+ */
+export const scryfallHeaders: Record<string, string> = {
+  Accept: "application/json",
+  ...(typeof window === "undefined" ? { "User-Agent": "Deckforge/1.0 (+https://deckforge-magic.vercel.app)" } : {}),
+};
+
 /** Nombre maximal de cartes par requête /cards/collection. */
 export const SCRYFALL_CHUNK = 75;
 
@@ -40,7 +49,7 @@ export function toCardData(c: ScryfallCard): CardData {
 export async function fetchCardsByName(names: string[], signal?: AbortSignal): Promise<Map<string, CardData>> {
   const res = await fetch("https://api.scryfall.com/cards/collection", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: { ...scryfallHeaders, "Content-Type": "application/json" },
     body: JSON.stringify({ identifiers: names.map((n) => ({ name: n.split(/\s*\/\/\s*/)[0] })) }),
     signal,
   });

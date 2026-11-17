@@ -1,0 +1,78 @@
+.wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.wrap input {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+.wrap input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
+}
+
+.popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  width: min(340px, calc(100vw - 64px));
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow), 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+.option {
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.option mark {
+  background: none;
+  color: inherit;
+  font-weight: 700;
+}
+.active {
+  background: var(--panel2);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.info {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: normal;
+}
+.preview {
+  width: 170px;
+  aspect-ratio: 488 / 680;
+  border-radius: var(--card-radius);
+  background: var(--panel2);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+}
+
+/* Sur petit écran, pas de place pour l'image à côté de la liste. */
+@media (max-width: 640px) {
+  .preview {
+    display: none;
+  }
+}
