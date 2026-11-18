@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { getDeck, isUuid, nextVersionNumber } from "@/db/queries";
 import { comparisons, decks, deckVersions } from "@/db/schema";
 import { requireUser } from "@/lib/auth/dal";
+import { insertWithNextNumber } from "@/lib/next-number";
 import { parseList, totalCards } from "@/lib/parse";
 import type { Decisions } from "@/lib/types";
 
@@ -56,11 +57,19 @@ export async function addVersion(deckId: string, _prev: FormState, form: FormDat
   const list = checkList(form.get("listText"));
   if ("error" in list) return { ...list, note: note ?? undefined };
 
-  const number = await nextVersionNumber(deckId);
-  const [created] = await db
-    .insert(deckVersions)
-    .values({ deckId, number, note, listText: list.text, cardCount: list.count })
-    .returning({ id: deckVersions.id });
+  // Deux envois simultanés peuvent viser le même numéro : le second en reprend un autre.
+  const created = await insertWithNextNumber(
+    () => nextVersionNumber(deckId),
+    async (number) => {
+      const [row] = await db
+        .insert(deckVersions)
+        .values({ deckId, number, note, listText: list.text, cardCount: list.count })
+        .onConflictDoNothing({ target: [deckVersions.deckId, deckVersions.number] })
+        .returning({ id: deckVersions.id });
+      return row;
+    },
+  );
+  if (!created) return { error: "Ce deck vient d'être modifié. Réessaie.", note: note ?? undefined };
   await touch(deckId);
 
   const previous = versions.at(-1);
